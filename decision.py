@@ -1,4 +1,5 @@
 import csv
+import math 
 
 def read_data(filename):
     """
@@ -21,6 +22,58 @@ def read_data(filename):
 
     return data,donnees_possibles
 
-for instance in read_data('golf.csv')[0]:
+def I(p,n):
+    if p == 0 or n == 0:
+        return 0
+    return -p/(p+n)*math.log2(p/(p+n)) -n/(p+n)*math.log2(n/(p+n))
+
+def E(data,donnees_possibles,attribut,attribut_classe='class'):
+    """
+    calcul de l'entropie pour un attribut donné
+    """
+    valeurs_classe = list(donnees_possibles[attribut_classe])
+    entropie = 0
+    for valeur in donnees_possibles[attribut]:
+        p = 0
+        n = 0
+        for instance in data:
+            if instance[attribut] == valeur:
+                if instance[attribut_classe] == valeurs_classe[0]:
+                    p += 1
+                else:
+                    n += 1
+        entropie += (p + n) / (len(data)) * I(p, n)
+    return entropie
+
+def calcul_gains(filename,attribut_classe='class'):
+    """
+    calcul du gain d'information pour un attribut avec les formules de la doc
+    """
+    data,donnees_possibles = read_data(filename)
+    gains={}
+    for attribut in donnees_possibles:
+        if attribut != attribut_classe:
+            p = 0
+            n = 0
+            valeurs_classe = list(donnees_possibles[attribut_classe])
+            for instance in data:
+                if instance[attribut_classe] == valeurs_classe[0]:
+                    p += 1
+                else:
+                    n += 1
+            gain = I(p,n) - E(data,donnees_possibles,attribut,attribut_classe)
+            print(f"gain({attribut})\t= {(round(gain,3))}")
+            gains[attribut] = gain
+    return gains
+
+
+
+filename = "data/golf.csv"
+for instance in read_data(filename)[0]:
     print(instance)
-print(read_data('golf.csv')[1])
+print('\n')
+print(read_data(filename)[1])
+
+print('\n')
+attribut_classe = 'play'
+gains = calcul_gains(filename,attribut_classe)
