@@ -1,6 +1,27 @@
 import csv
 import math 
 
+class Tree:
+    def __init__(self,attribut):
+        self.attribut = attribut
+        self.enfants = {}
+    
+    def __str__(self):
+        return f"Tree({self.attribut})"
+    
+    def __repr__(self):
+        return f"Tree({self.attribut})"
+    
+    def add_enfant(self,valeur,arbre):
+        self.enfants[valeur] = arbre
+
+def afficher_arbre(arbre,indent=0):
+    print(f"{'-'*indent}{arbre.attribut}")
+    for valeur,enfant in arbre.enfants.items():
+        print(f"{' '*(indent+1)}\{valeur}")
+        afficher_arbre(enfant,indent+4)
+
+
 def read_data(filename):
     """
     lecture des données d'apprentissage à partir d'un fichier csv
@@ -45,11 +66,10 @@ def E(data,donnees_possibles,attribut,attribut_classe='class'):
         entropie += (p + n) / (len(data)) * I(p, n)
     return entropie
 
-def calcul_gains(filename,attribut_classe='class'):
+def calcul_gains(filename,data,donnees_possibles,attribut_classe='class'):
     """
     calcul du gain d'information pour un attribut avec les formules de la doc
     """
-    data,donnees_possibles = read_data(filename)
     gains={}
     for attribut in donnees_possibles:
         if attribut != attribut_classe:
@@ -66,6 +86,27 @@ def calcul_gains(filename,attribut_classe='class'):
             gains[attribut] = gain
     return gains
 
+def creer_arbre(filename,data,donnees_possibles,attribut_classe='class'):
+    gains = calcul_gains(filename,data,donnees_possibles,attribut_classe)
+    meilleur_attribut = max(gains, key=gains.get)
+    print(f"\nmeilleur attribut: {meilleur_attribut}")
+
+    arbre = Tree(meilleur_attribut)
+
+    for valeur in donnees_possibles[meilleur_attribut]:
+        print(f"pour {meilleur_attribut} = {valeur}")
+        sous_ensemble = [instance for instance in data if instance[meilleur_attribut] == valeur]
+        for i in range(len(sous_ensemble)):
+            print(sous_ensemble[i])
+        print()
+        if len(sous_ensemble) <= 1:
+            print(f"feuille: {sous_ensemble[0][attribut_classe]}")
+            arbre.add_enfant(valeur,Tree(sous_ensemble[0][attribut_classe]))
+        else:
+            donnees_possibles_restantes = donnees_possibles.copy()
+            del donnees_possibles_restantes[meilleur_attribut]
+            arbre.add_enfant(valeur,creer_arbre(filename,sous_ensemble,donnees_possibles_restantes,attribut_classe))
+    return arbre
 
 
 filename = "data/golf.csv"
@@ -76,4 +117,7 @@ print(read_data(filename)[1])
 
 print('\n')
 attribut_classe = 'play'
-gains = calcul_gains(filename,attribut_classe)
+data,donnees_possibles = read_data(filename)
+arbre=creer_arbre(filename,data,donnees_possibles,attribut_classe)
+print('\n')
+afficher_arbre(arbre)
