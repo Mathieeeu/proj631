@@ -1,25 +1,81 @@
 import csv
 import math 
+import json
 
-class Tree:
-    def __init__(self,attribut):
-        self.attribut = attribut
-        self.enfants = {}
-    
-    def __str__(self):
-        return f"Tree({self.attribut})"
-    
-    def __repr__(self):
-        return f"Tree({self.attribut})"
-    
-    def add_enfant(self,valeur,arbre):
-        self.enfants[valeur] = arbre
+def construire_arbre(data,donnees_possibles,attribut_classe='class',racine={}):
+    gains = calcul_gains(data,donnees_possibles,attribut_classe)
+    meilleur_attribut = max(gains, key=gains.get)
+    print(f"meilleur attribut : {meilleur_attribut}")
 
-def afficher_arbre(arbre,indent=0):
-    print(f"{'-'*indent}{arbre.attribut}")
-    for valeur,enfant in arbre.enfants.items():
-        print(f"{' '*(indent+1)}\{valeur}")
-        afficher_arbre(enfant,indent+4)
+    racine = {meilleur_attribut:{}}
+
+    for valeur in donnees_possibles[meilleur_attribut]:
+        racine[meilleur_attribut][valeur] = {}
+
+    print(f"\033[32m\033[1marbre créé avec la racine {meilleur_attribut}\033[0m")
+    afficher_arbre(racine)
+    print('\n\n')
+
+
+    sous_ensembles = {}
+    for valeur in donnees_possibles[meilleur_attribut]:
+        sous_ensembles[valeur] = [instance for instance in data if instance[meilleur_attribut] == valeur]
+
+    for valeur,ensemble in sous_ensembles.items():
+        for instance in ensemble:
+            del instance[meilleur_attribut]
+        print(f"\n\n\033[32m\033[1mnouvel arbre pour {valeur}\033[0m :: {ensemble}\n")
+
+        print(donnees_possibles)
+        donnees_possibles_sans_attribut = donnees_possibles.copy()
+        del donnees_possibles_sans_attribut[meilleur_attribut]
+        gains=calcul_gains(ensemble,donnees_possibles_sans_attribut,attribut_classe)
+        print(gains)
+        if all(gain == 0 for gain in gains.values()):
+            print(f"feuille avec valeur de classe {ensemble[0][attribut_classe]}")
+            racine[meilleur_attribut][valeur] = ensemble[0][attribut_classe]
+            print(f"racine : {racine}")
+        else:
+            meilleur_attribut_enfant = max(gains, key=gains.get)
+            print(f"nouvel arbre avec attribut {meilleur_attribut_enfant}")
+            valeurs_possibles_attr_enf = donnees_possibles_sans_attribut[meilleur_attribut_enfant]
+            print(f"valeurs possibles pour {meilleur_attribut_enfant} : {valeurs_possibles_attr_enf}")
+
+            
+            racine[meilleur_attribut][valeur] = {meilleur_attribut_enfant:{}}
+            for val in valeurs_possibles_attr_enf:
+                racine[meilleur_attribut][valeur][meilleur_attribut_enfant][val] = {}
+            print(f"meilleur attribut : {meilleur_attribut_enfant}")
+            afficher_arbre(racine[meilleur_attribut][valeur]) 
+            
+            abr=construire_arbre(
+                ensemble,
+                donnees_possibles_sans_attribut,
+                attribut_classe,
+                racine[meilleur_attribut][valeur][meilleur_attribut_enfant])
+            racine[meilleur_attribut][valeur] = abr
+
+    afficher_arbre(racine)
+    print(racine[meilleur_attribut])
+    return racine
+    
+
+def afficher_arbre(racine,indent=0,debug=False):
+    if debug:
+        pass
+    if indent == 0:
+        print('\033[32m',end='')
+    for cle,valeur in racine.items():
+        print(f"{'| '*indent}{cle}")
+        if type(valeur) is dict:
+            afficher_arbre(valeur,indent+1)
+        else:
+            print(f"{'| '*(indent+1)}\033[31m{valeur}\033[0m\033[32m")
+    if indent == 0:
+        print('\033[0m')
+
+    with open('tree.json', 'w') as f:
+        json.dump(racine, f, indent=4)
 
 
 def read_data(filename):
@@ -66,11 +122,12 @@ def E(data,donnees_possibles,attribut,attribut_classe='class'):
         entropie += (p + n) / (len(data)) * I(p, n)
     return entropie
 
-def calcul_gains(filename,data,donnees_possibles,attribut_classe='class'):
+def calcul_gains(data,donnees_possibles,attribut_classe='class'):
     """
     calcul du gain d'information pour un attribut avec les formules de la doc
     """
     gains={}
+    print(donnees_possibles)
     for attribut in donnees_possibles:
         if attribut != attribut_classe:
             p = 0
@@ -82,31 +139,9 @@ def calcul_gains(filename,data,donnees_possibles,attribut_classe='class'):
                 else:
                     n += 1
             gain = I(p,n) - E(data,donnees_possibles,attribut,attribut_classe)
-            print(f"gain({attribut})\t= {(round(gain,3))}")
+            print(f"gain({attribut})\t= {(round(gain,10))}")
             gains[attribut] = gain
     return gains
-
-def creer_arbre(filename,data,donnees_possibles,attribut_classe='class'):
-    gains = calcul_gains(filename,data,donnees_possibles,attribut_classe)
-    meilleur_attribut = max(gains, key=gains.get)
-    print(f"\nmeilleur attribut: {meilleur_attribut}")
-
-    arbre = Tree(meilleur_attribut)
-
-    for valeur in donnees_possibles[meilleur_attribut]:
-        print(f"pour {meilleur_attribut} = {valeur}")
-        sous_ensemble = [instance for instance in data if instance[meilleur_attribut] == valeur]
-        for i in range(len(sous_ensemble)):
-            print(sous_ensemble[i])
-        print()
-        if len(sous_ensemble) <= 1:
-            print(f"feuille: {sous_ensemble[0][attribut_classe]}")
-            arbre.add_enfant(valeur,Tree(sous_ensemble[0][attribut_classe]))
-        else:
-            donnees_possibles_restantes = donnees_possibles.copy()
-            del donnees_possibles_restantes[meilleur_attribut]
-            arbre.add_enfant(valeur,creer_arbre(filename,sous_ensemble,donnees_possibles_restantes,attribut_classe))
-    return arbre
 
 
 filename = "data/golf.csv"
@@ -118,6 +153,6 @@ print(read_data(filename)[1])
 print('\n')
 attribut_classe = 'play'
 data,donnees_possibles = read_data(filename)
-arbre=creer_arbre(filename,data,donnees_possibles,attribut_classe)
-print('\n')
-afficher_arbre(arbre)
+arbre=construire_arbre(data,donnees_possibles,attribut_classe)
+print('\nArbre construit :')
+afficher_arbre(arbre,debug=True)

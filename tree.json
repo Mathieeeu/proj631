@@ -1,0 +1,17 @@
+{
+    "outlook": {
+        "sunny": {
+            "humidity": {
+                "normal": "yes",
+                "high": "no"
+            }
+        },
+        "overcast": "yes",
+        "rain": {
+            "wind": {
+                "true": "no",
+                "false": "yes"
+            }
+        }
+    }
+}
