@@ -69,20 +69,30 @@ def construire_arbre(data,donnees_possibles,attribut_classe='class',racine={}):
     afficher_arbre(racine)
     return racine    
 
-def afficher_arbre(racine,indent=0,debug=False):
+def afficher_arbre(racine,indent=0,debug=False,i=0):
+    style_reset="\033[0m"
+    # couleurs sur https://i.stack.imgur.com/KTSQa.png parce que c'est stylé ;)
+    style_titre = "\033[35m\033[1m"
+    style_attribut="\033[38;5;28m"
+    style_valeur="\033[38;5;37m"
+    style_classe="\033[31m"
+
     if debug:
         pass
     if indent == 0:
-        print('\nArbre construit :') if debug else None
-        print('\033[32m',end='') if debug else None
+        print(f"\n{style_titre}Arbre construit :{style_reset}") if debug else None
+        print(f"{style_attribut}",end='') if debug else None
     for cle,valeur in racine.items():
-        print(f"{'| '*indent}{cle}") if debug else None
-        if type(valeur) is dict:
-            afficher_arbre(valeur,indent+1,debug)
+        if i%2==1:
+            print(f"{'| '*indent}{style_valeur}{cle}{style_reset}{style_attribut}") if debug else None
         else:
-            print(f"{'| '*(indent+1)}\033[31m{valeur}\033[0m\033[32m") if debug else None
+            print(f"{'| '*indent}{cle}") if debug else None
+        if type(valeur) is dict:
+            afficher_arbre(valeur,indent+1,debug,i+1)
+        else:
+            print(f"{'| '*(indent+1)}{style_classe}{valeur}{style_reset}{style_attribut}") if debug else None
     if indent == 0:
-        print('\033[0m') if debug else None
+        print(f"{style_reset}") if debug else None
 
     with open('tree.json', 'w') as f:
         json.dump(racine, f, indent=4)

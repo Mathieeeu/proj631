@@ -2,11 +2,11 @@
     "outlook": {
         "rain": {
             "wind": {
-                "false": {
-                    "play": "yes"
-                },
                 "true": {
                     "play": "no"
+                },
+                "false": {
+                    "play": "yes"
                 }
             }
         },
