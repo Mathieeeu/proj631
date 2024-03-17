@@ -1,36 +1,27 @@
 {
-    "wind": {
-        "true": {
-            "temp": {
-                "cool": {
-                    "play": "no"
-                },
-                "mild": {
-                    "outlook": {
-                        "overcast": "overcast",
-                        "sunny": "sunny",
-                        "rain": "rain"
-                    }
-                },
-                "hot": "sunny"
-            }
-        },
-        "false": {
-            "outlook": {
-                "overcast": {
+    "outlook": {
+        "rain": {
+            "wind": {
+                "false": {
                     "play": "yes"
                 },
-                "sunny": {
-                    "temp": {
-                        "cool": "cool",
-                        "mild": "mild",
-                        "hot": "hot"
-                    }
+                "true": {
+                    "play": "no"
+                }
+            }
+        },
+        "sunny": {
+            "humidity": {
+                "high": {
+                    "play": "no"
                 },
-                "rain": {
+                "normal": {
                     "play": "yes"
                 }
             }
+        },
+        "overcast": {
+            "play": "yes"
         }
     }
 }
