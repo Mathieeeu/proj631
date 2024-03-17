@@ -4,9 +4,17 @@ import json
 
 def construire_arbre(data,donnees_possibles,attribut_classe='class',racine={}):
     gains = calcul_gains(data,donnees_possibles,attribut_classe)
-    meilleur_attribut = max(gains, key=gains.get)
+    meilleur_attribut = max(gains, key=gains.get, default=None)
     print(f"meilleur attribut : {meilleur_attribut}")
 
+    if gains[meilleur_attribut] == 0:
+        # si le gain est nul, on a atteint une feuille, on renvoie la valeur de la classe
+        print(f"\033[32m\033[1m\033[31mLe gain est nul\033[0m")
+        print('\n')
+        print(data)
+        print(data[0][attribut_classe])
+        racine = {attribut_classe:data[0][attribut_classe]}
+        return racine
     racine = {meilleur_attribut:{}}
 
     for valeur in donnees_possibles[meilleur_attribut]:
@@ -16,49 +24,45 @@ def construire_arbre(data,donnees_possibles,attribut_classe='class',racine={}):
     afficher_arbre(racine)
     print('\n\n')
 
-
-    sous_ensembles = {}
     for valeur in donnees_possibles[meilleur_attribut]:
-        sous_ensembles[valeur] = [instance for instance in data if instance[meilleur_attribut] == valeur]
+        print(f"\033[32mtraitement de la valeur \033[1m{valeur}\033[0m\033[32m de l'attribut {meilleur_attribut}\033[0m")
+        sous_ensemble = [instance for instance in data if instance[meilleur_attribut] == valeur]
+        print(f"\033[35msous-ensemble : {sous_ensemble}\033[0m")
+        print(f"\033[34mdonnées possibles : {donnees_possibles}\033[0m")
+        print('\n')
 
-    for valeur,ensemble in sous_ensembles.items():
-        for instance in ensemble:
-            del instance[meilleur_attribut]
-        print(f"\n\n\033[32m\033[1mnouvel arbre pour {valeur}\033[0m :: {ensemble}\n")
-
-        print(donnees_possibles)
-        donnees_possibles_sans_attribut = donnees_possibles.copy()
-        del donnees_possibles_sans_attribut[meilleur_attribut]
-        gains=calcul_gains(ensemble,donnees_possibles_sans_attribut,attribut_classe)
-        print(gains)
-        if all(gain == 0 for gain in gains.values()):
-            print(f"feuille avec valeur de classe {ensemble[0][attribut_classe]}")
-            racine[meilleur_attribut][valeur] = ensemble[0][attribut_classe]
-            print(f"racine : {racine}")
+        if len(sous_ensemble)==0:
+            print(f"\033[32m\033[1m\033[31mLe sous-ensemble est vide\033[0m")
+            print('\n')
+            continue
+        elif len(sous_ensemble)==1:
+            print(f"\033[32m\033[1m\033[31mLe sous-ensemble ne contient qu'une seule instance\033[0m")
+            print('\n')
+            racine[meilleur_attribut][valeur] = list(sous_ensemble[0].values())[0]
+            continue
+        elif len(donnees_possibles)==1:
+            print(f"\033[32m\033[1m\033[31mIl n'y a plus d'attribut à traiter\033[0m")
+            print('\n')
+            racine[meilleur_attribut][valeur] = list(sous_ensemble[0].values())[0]
+            continue
         else:
-            meilleur_attribut_enfant = max(gains, key=gains.get)
-            print(f"nouvel arbre avec attribut {meilleur_attribut_enfant}")
-            valeurs_possibles_attr_enf = donnees_possibles_sans_attribut[meilleur_attribut_enfant]
-            print(f"valeurs possibles pour {meilleur_attribut_enfant} : {valeurs_possibles_attr_enf}")
-
-            
-            racine[meilleur_attribut][valeur] = {meilleur_attribut_enfant:{}}
-            for val in valeurs_possibles_attr_enf:
-                racine[meilleur_attribut][valeur][meilleur_attribut_enfant][val] = {}
-            print(f"meilleur attribut : {meilleur_attribut_enfant}")
-            afficher_arbre(racine[meilleur_attribut][valeur]) 
-            
-            abr=construire_arbre(
-                ensemble,
-                donnees_possibles_sans_attribut,
-                attribut_classe,
-                racine[meilleur_attribut][valeur][meilleur_attribut_enfant])
-            racine[meilleur_attribut][valeur] = abr
-
+            print(f"\033[32m\033[1m\033[31mIl y a encore des attributs à traiter\033[0m")
+            # créer un sous-ensemble de données sans l'attribut déjà traité
+            sous_ensemble_plus_petit = []
+            donnees_possibles_plus_petit = donnees_possibles.copy()
+            for instance in sous_ensemble:
+                instance_plus_petit = instance.copy()
+                instance_plus_petit.pop(meilleur_attribut)
+                sous_ensemble_plus_petit.append(instance_plus_petit)
+            for instance in donnees_possibles:
+                if instance == meilleur_attribut:
+                    donnees_possibles_plus_petit.pop(instance)
+            print(f"\033[35msous-ensemble plus petit : {sous_ensemble_plus_petit}\033[0m")
+            print(f"\033[34mdonnées possibles plus petites : {donnees_possibles_plus_petit}\033[0m")
+            print(f"\033[33m{racine}\033[0m")
+            racine[meilleur_attribut][valeur] = construire_arbre(sous_ensemble_plus_petit,donnees_possibles_plus_petit,attribut_classe)
     afficher_arbre(racine)
-    print(racine[meilleur_attribut])
-    return racine
-    
+    return racine    
 
 def afficher_arbre(racine,indent=0,debug=False):
     if debug:
