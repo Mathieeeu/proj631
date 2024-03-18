@@ -93,9 +93,8 @@ def afficher_arbre(racine,indent=0,debug=False,i=0):
             print(f"{'| '*(indent+1)}{style_classe}{valeur}{style_reset}{style_attribut}") if debug else None
     if indent == 0:
         print(f"{style_reset}") if debug else None
-
-    with open('tree.json', 'w') as f:
-        json.dump(racine, f, indent=4)
+        with open(f'tree.json', 'w') as f:
+            json.dump(racine, f, indent=4)
 
 
 def read_data(filename):
@@ -163,6 +162,40 @@ def calcul_gains(data,donnees_possibles,attribut_classe='class'):
             gains[attribut] = gain
     return gains
 
+def discretser_data(data,donnees_possibles,colonnes,nb_domaines):
+    data_discret = data
+    donnees_possibles_discret = donnees_possibles
+    print(data) if debug else None
+    for colonne in colonnes:
+        print('\n') if debug else None
+        valeurs=[]
+        valeurs_uniques=[]
+        for instance in data:
+            valeurs.append(int(instance[colonne]))
+        valeurs.sort()
+        valeurs_uniques=list(set(valeurs))
+        valeurs_uniques.sort()     
+        print(colonne,valeurs) if debug else None
+        print(colonne,valeurs_uniques) if debug else None
+        print(len(valeurs),len(valeurs_uniques)) if debug else None
+        domaines = [[valeurs_uniques[i*len(valeurs_uniques)//nb_domaines],valeurs_uniques[(i+1)*len(valeurs_uniques)//nb_domaines-1]] for i in range(nb_domaines)]
+        print(domaines,'\n') if debug else None
+
+        for i,instance in enumerate(data):
+            for j in range(nb_domaines):
+                if int(instance[colonne])>=domaines[j][0] and int(instance[colonne])<=domaines[j][1]:
+                    data_discret[i][colonne]=domaines[j]
+                    break
+        
+        set_domaines = set(tuple(domaine) for domaine in domaines)
+        print(set_domaines) if debug else None
+        donnees_possibles_discret[colonne] = set_domaines
+
+        print(data_discret) if debug else None
+        print("\n") if debug else None
+        print(donnees_possibles_discret) if debug else None
+
+    return data_discret,donnees_possibles_discret
 
 filename = "data/golf.csv"
 
@@ -177,5 +210,13 @@ data,donnees_possibles = read_data(filename)
 arbre=construire_arbre(data,donnees_possibles,attribut_classe)
 
 
-debug = False
 afficher_arbre(arbre,debug=True)
+
+
+# filename = "data/golf_bis.csv"
+# data,donnees_possibles = read_data(filename)
+# colonnes_a_discretiser = ['temp','humidity']
+# data,donnees_possibles = discretser_data(data,donnees_possibles,colonnes_a_discretiser,nb_domaines=4)
+
+# arbre_bis=construire_arbre(data,donnees_possibles,attribut_classe)
+# afficher_arbre(arbre_bis,debug=True)

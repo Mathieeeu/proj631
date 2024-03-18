@@ -1,27 +1,71 @@
 {
-    "outlook": {
-        "rain": {
-            "wind": {
-                "true": {
-                    "play": "no"
+    "temp": {
+        "hot": {
+            "outlook": {
+                "overcast": {
+                    "humidity": {
+                        "high": {
+                            "play": "yes"
+                        },
+                        "normal": {
+                            "play": "no"
+                        }
+                    }
                 },
-                "false": {
+                "rain": {
+                    "play": "null"
+                },
+                "sunny": {
+                    "play": "no"
+                }
+            }
+        },
+        "cool": {
+            "outlook": {
+                "overcast": {
+                    "play": "yes"
+                },
+                "rain": {
+                    "wind": {
+                        "true": {
+                            "play": "no"
+                        },
+                        "false": {
+                            "play": "yes"
+                        }
+                    }
+                },
+                "sunny": {
                     "play": "yes"
                 }
             }
         },
-        "sunny": {
+        "mild": {
             "humidity": {
                 "high": {
-                    "play": "no"
+                    "outlook": {
+                        "overcast": {
+                            "play": "yes"
+                        },
+                        "rain": {
+                            "wind": {
+                                "true": {
+                                    "play": "no"
+                                },
+                                "false": {
+                                    "play": "yes"
+                                }
+                            }
+                        },
+                        "sunny": {
+                            "play": "no"
+                        }
+                    }
                 },
                 "normal": {
                     "play": "yes"
                 }
             }
-        },
-        "overcast": {
-            "play": "yes"
         }
     }
 }
