@@ -6,7 +6,7 @@ class CMatrice:
         self.matrice = [[0 for j in range(n)] for i in range(n)]
 
     def __str__(self):
-        s = ''
+        s = f'INFO:\nlignes:valeur dans l\'arbre\ncolonnes:valeurs dans data\n'
         if self.entetes_colonnes:
             s += '\t' + '\t'.join(self.entetes_colonnes) + '\n'
         for i in range(self.n):
