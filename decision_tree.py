@@ -11,13 +11,14 @@ def construire_arbre(data,donnees_possibles,attribut_classe='class',racine={}):
     print(f"meilleur attribut : {meilleur_attribut}") if debug else None
 
     if gains[meilleur_attribut] == 0:
-        # si le gain est nul, on a atteint une feuille, on renvoie la valeur de la classe
+        # si le gain est nul, on a atteint une feuille, on renvoie la valeur de la classe majoritaire
         print(f"\033[32m\033[1m\033[31mLe gain est nul\033[0m") if debug else None
         print('\n' if debug else '',end='')
         print(data if debug else '',end='')
         print(data[0][attribut_classe] if debug else '',end='')
-        racine = {attribut_classe:data[0][attribut_classe]}
+        racine = {attribut_classe:max(data, key=data.count)[attribut_classe]}
         return racine
+    
     racine = {meilleur_attribut:{}}
 
     for valeur in donnees_possibles[meilleur_attribut]:
@@ -27,8 +28,6 @@ def construire_arbre(data,donnees_possibles,attribut_classe='class',racine={}):
     afficher_arbre(racine)
     print('\n\n' if debug else '',end='')
 
-    if meilleur_attribut=="temp":   # pour le debug
-        pass
     print(donnees_possibles[meilleur_attribut] if debug else '',end='')
 
     for valeur in donnees_possibles[meilleur_attribut]:
@@ -67,7 +66,7 @@ def construire_arbre(data,donnees_possibles,attribut_classe='class',racine={}):
             print(f"\033[33m{racine}\033[0m") if debug else None
             racine[meilleur_attribut][valeur] = construire_arbre(sous_ensemble_plus_petit,donnees_possibles_plus_petit,attribut_classe)
     afficher_arbre(racine)
-    return racine    
+    return racine
 
 def afficher_arbre(racine,indent=0,debug=False,i=0):
     style_reset="\033[0m"
@@ -77,8 +76,6 @@ def afficher_arbre(racine,indent=0,debug=False,i=0):
     style_valeur="\033[38;5;37m"
     style_classe="\033[31m"
 
-    if debug:
-        pass
     if indent == 0:
         print(f"\n{style_titre}Arbre construit :{style_reset}") if debug else None
         print(f"{style_attribut}",end='') if debug else None
@@ -115,7 +112,6 @@ def read_data(filename):
             if attribut not in donnees_possibles:
                 donnees_possibles[attribut] = set()
             donnees_possibles[attribut].add(valeur)
-
     return data,donnees_possibles
 
 def I(p,n):
@@ -197,7 +193,7 @@ def discretser_data(data,donnees_possibles,colonnes,nb_domaines):
 
     return data_discret,donnees_possibles_discret
 
-filename = "data/golf.csv"
+# filename = "data/golf.csv"
 
 # for instance in read_data(filename)[0]:
 #     print(instance)
@@ -205,12 +201,12 @@ filename = "data/golf.csv"
 # print(read_data(filename)[1])
 # print('\n')
 
-attribut_classe = 'play'
-data,donnees_possibles = read_data(filename)
-arbre=construire_arbre(data,donnees_possibles,attribut_classe)
+# attribut_classe = 'play'
+# data,donnees_possibles = read_data(filename)
+# arbre=construire_arbre(data,donnees_possibles,attribut_classe)
 
 
-afficher_arbre(arbre,debug=True)
+# afficher_arbre(arbre,debug=True)
 
 
 # filename = "data/golf_bis.csv"
