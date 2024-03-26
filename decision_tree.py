@@ -5,9 +5,13 @@ import json
 global debug
 debug = False
 
-def construire_arbre(data,donnees_possibles,attribut_classe='class',racine={}):
-    gains = calcul_gains(data,donnees_possibles,attribut_classe)
-    meilleur_attribut = max(gains, key=gains.get, default=None)
+def construire_arbre(data,donnees_possibles,attribut_classe='class',racine={},method="ID3"):
+    if method == "ID3":
+        gains = calcul_gains(data,donnees_possibles,attribut_classe)
+        meilleur_attribut = max(gains, key=gains.get, default=None)
+    elif method == "C45":
+        gains = ratio_gain(data,donnees_possibles,attribut_classe)
+        meilleur_attribut = max(gains, key=gains.get, default=None)
     print(f"meilleur attribut : {meilleur_attribut}") if debug else None
 
     if gains[meilleur_attribut] == 0:
@@ -64,7 +68,7 @@ def construire_arbre(data,donnees_possibles,attribut_classe='class',racine={}):
             print(f"\033[35msous-ensemble plus petit : {sous_ensemble_plus_petit}\033[0m") if debug else None
             print(f"\033[34mdonnées possibles plus petites : {donnees_possibles_plus_petit}\033[0m") if debug else None
             print(f"\033[33m{racine}\033[0m") if debug else None
-            racine[meilleur_attribut][valeur] = construire_arbre(sous_ensemble_plus_petit,donnees_possibles_plus_petit,attribut_classe)
+            racine[meilleur_attribut][valeur] = construire_arbre(sous_ensemble_plus_petit,donnees_possibles_plus_petit,attribut_classe,method)
     afficher_arbre(racine)
     return racine
 
@@ -92,7 +96,6 @@ def afficher_arbre(racine,indent=0,debug=False,i=0):
         print(f"{style_reset}") if debug else None
         with open(f'tree.json', 'w') as f:
             json.dump(racine, f, indent=4)
-
 
 def read_data(filename):
     """
@@ -137,6 +140,29 @@ def E(data,donnees_possibles,attribut,attribut_classe='class'):
         entropie += (p + n) / (len(data)) * I(p, n)
     return entropie
 
+def split_entropie(data,donnees_possibles,attribut,attribut_classe='class'):
+    """
+    calcul le split d'entropie pour un attribut donné (C4.5) 
+    split = - sum(v€S) (|Sv|/|S|) * log2(|Sv|/|S|)
+    """
+    split = 0
+    for valeur in donnees_possibles[attribut]:
+        sous_ensemble = [instance for instance in data if instance[attribut] == valeur]
+        split -= len(sous_ensemble) / len(data) * math.log2(len(sous_ensemble) / len(data))
+    return split
+
+def ratio_gain(data,donnees_possibles,attribut_classe='class'):
+    """
+    calcul des ratios de gain C4.5 de l'ensemble pour chaque attribut
+    """
+    ratios = {}
+    for attribut in donnees_possibles:
+        if attribut != attribut_classe:
+            split = split_entropie(data,donnees_possibles,attribut,attribut_classe)
+            gain = calcul_gains(data,donnees_possibles,attribut_classe)[attribut]
+            ratios[attribut] = gain / split if split != 0 else float('inf')
+    return ratios
+
 def calcul_gains(data,donnees_possibles,attribut_classe='class'):
     """
     calcul du gain d'information pour un attribut avec les formules de la doc
@@ -157,6 +183,7 @@ def calcul_gains(data,donnees_possibles,attribut_classe='class'):
             print(f"gain({attribut})\t= {(round(gain,10))}") if debug else None
             gains[attribut] = gain
     return gains
+
 
 def discretser_data(data,donnees_possibles,colonnes,nb_domaines):
     data_discret = data
@@ -216,3 +243,14 @@ def discretser_data(data,donnees_possibles,colonnes,nb_domaines):
 
 # arbre_bis=construire_arbre(data,donnees_possibles,attribut_classe)
 # afficher_arbre(arbre_bis,debug=True)
+
+# # TEST C4.5
+# filename = "data/golf.csv"
+# attribut_classe = 'play'
+# data,donnees_possibles = read_data(filename)
+# attribut = "outlook"
+# print(calcul_gains(data,donnees_possibles,attribut_classe)[attribut])
+# print(split_entropie(data,donnees_possibles,attribut,attribut_classe))
+# print(ratio_gain(data,donnees_possibles,attribut_classe))
+# arbre=construire_arbre(data[:10],donnees_possibles,attribut_classe,method="C45")
+# afficher_arbre(arbre,debug=True)

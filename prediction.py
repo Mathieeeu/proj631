@@ -40,7 +40,7 @@ filename = "data/golf.csv"
 attribut_classe = 'play'
 data,donnees_possibles = read_data(filename)
 data_training = data[:10]
-arbre=construire_arbre(data_training,donnees_possibles,attribut_classe)
+arbre=construire_arbre(data_training,donnees_possibles,attribut_classe,method="ID3")
 afficher_arbre(arbre,debug=True)
 
 data_test = data[10:]
