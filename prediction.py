@@ -33,19 +33,37 @@ def matrice_confusion(data,donnees_possibles,arbre,attribut_classe='class'):
                         matrice[j][i] += 1
     return matrice
 
+def predire_valeurs_manquantes(data,donnees_possibles,arbre,attribut_classe='class'):
+    """
+    prédit les valeurs manquantes dans un jeu de données (c'est les valeurs avec des '?')
+    """
+    # ne touche qu'aux lignes avec des '?'
+    return data
 
 # TESTS -----------------------------------------------------------------------
+if __name__ == '__main__':
+    # filename = "data/golf.csv"
+    # # filename = "data/golf_bis.csv"
+    # attribut_classe = 'play'
+    # data,donnees_possibles = read_data(filename)
+    # data_training = data[:10]
+    # arbre=construire_arbre(data_training,donnees_possibles,attribut_classe,method="ID3",)
+    # afficher_arbre(arbre,debug=True)
 
-filename = "data/golf.csv"
-attribut_classe = 'play'
-data,donnees_possibles = read_data(filename)
-data_training = data[:10]
-arbre=construire_arbre(data_training,donnees_possibles,attribut_classe,method="ID3")
-afficher_arbre(arbre,debug=True)
+    # data_test = data[10:]
+    # matrice = matrice_confusion(data_test,donnees_possibles,arbre,attribut_classe)
+    # print(matrice)
 
-data_test = data[10:]
+    filename = "data/golf_copy.csv"
+    attribut_classe = 'play'
+    data,donnees_possibles = read_data(filename)
+    print(data)
+    arbre2 = construire_arbre(data,donnees_possibles,attribut_classe,method="ID3")
+    afficher_arbre(arbre2,debug=True)
+    data_corrigee = predire_valeurs_manquantes(data,donnees_possibles,arbre2,attribut_classe)
 
-matrice = matrice_confusion(data_test,donnees_possibles,arbre,attribut_classe)
-print(matrice)
-
-
+    # enregistre les données corrigées dans un fichier csv
+    with open(f"{filename[:-4]}_corrigee.csv","w") as f:
+        f.write(','.join(data_corrigee[0].keys())+'\n')
+        for instance in data_corrigee:
+            f.write(','.join([str(v) for v in instance.values()])+'\n')

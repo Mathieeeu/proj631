@@ -6,6 +6,13 @@ global debug
 debug = False
 
 def construire_arbre(data,donnees_possibles,attribut_classe='class',racine={},method="ID3"):
+    # on ne prend pas en compte les lignes ayant des données manquantes
+    data = [instance for instance in data if '?' not in instance.values()]
+    # on supprime les ? des données possibles
+    for attribut in donnees_possibles:
+        donnees_possibles[attribut].discard('?')
+    print(data)
+    exit()
     if method == "ID3":
         gains = calcul_gains(data,donnees_possibles,attribut_classe)
         meilleur_attribut = max(gains, key=gains.get, default=None)
@@ -115,6 +122,13 @@ def read_data(filename):
             if attribut not in donnees_possibles:
                 donnees_possibles[attribut] = set()
             donnees_possibles[attribut].add(valeur)
+    
+    #discrétisation des valeurs quand elles sont continues
+    attributs_discretisables = liste_discretisable(donnees_possibles)
+    for attribut in attributs_discretisables:
+        print("AAAA")
+        data,donnees_possibles=discretiser(data,donnees_possibles,attribut,attributs_discretisables[attribut])
+
     return data,donnees_possibles
 
 def I(p,n):
@@ -148,7 +162,8 @@ def split_entropie(data,donnees_possibles,attribut,attribut_classe='class'):
     split = 0
     for valeur in donnees_possibles[attribut]:
         sous_ensemble = [instance for instance in data if instance[attribut] == valeur]
-        split -= len(sous_ensemble) / len(data) * math.log2(len(sous_ensemble) / len(data))
+        if len(sous_ensemble) != 0:
+            split -= len(sous_ensemble) / len(data) * math.log2(len(sous_ensemble) / len(data))
     return split
 
 def ratio_gain(data,donnees_possibles,attribut_classe='class'):
@@ -184,73 +199,101 @@ def calcul_gains(data,donnees_possibles,attribut_classe='class'):
             gains[attribut] = gain
     return gains
 
+def est_discretisable(donnees_possibles,attribut):
+    """
+    vérifie si un attribut peut être discrétisé
+    """
+    for valeur in donnees_possibles[attribut]:
+        try:
+            float(valeur)
+        except ValueError:
+            return False
+    return True
 
-def discretser_data(data,donnees_possibles,colonnes,nb_domaines):
-    data_discret = data
-    donnees_possibles_discret = donnees_possibles
-    print(data) if debug else None
-    for colonne in colonnes:
-        print('\n') if debug else None
-        valeurs=[]
-        valeurs_uniques=[]
-        for instance in data:
-            valeurs.append(int(instance[colonne]))
-        valeurs.sort()
-        valeurs_uniques=list(set(valeurs))
-        valeurs_uniques.sort()     
-        print(colonne,valeurs) if debug else None
-        print(colonne,valeurs_uniques) if debug else None
-        print(len(valeurs),len(valeurs_uniques)) if debug else None
-        domaines = [[valeurs_uniques[i*len(valeurs_uniques)//nb_domaines],valeurs_uniques[(i+1)*len(valeurs_uniques)//nb_domaines-1]] for i in range(nb_domaines)]
-        print(domaines,'\n') if debug else None
+def liste_discretisable(donnees_possibles):
+    res = {}
+    for attribut in donnees_possibles:
+        if est_discretisable(donnees_possibles,attribut):
+            res[attribut] = donnees_possibles[attribut]
+    return res
 
-        for i,instance in enumerate(data):
-            for j in range(nb_domaines):
-                if int(instance[colonne])>=domaines[j][0] and int(instance[colonne])<=domaines[j][1]:
-                    data_discret[i][colonne]=domaines[j]
-                    break
-        
-        set_domaines = set(tuple(domaine) for domaine in domaines)
-        print(set_domaines) if debug else None
-        donnees_possibles_discret[colonne] = set_domaines
+def discretiser(data,donnees_possibles,attribut,valeurs_possibles):
+    """
+    On crée deux intervalles qui séparent les valeurs possibles de l'attribut en deux à la médiane
+    """
+    data_discretise = []
+    donnees_possibles_discretise = donnees_possibles.copy()
 
-        print(data_discret) if debug else None
-        print("\n") if debug else None
-        print(donnees_possibles_discret) if debug else None
+    liste_intervalles = []
+    valeurs_triees = sorted([float(valeur) for valeur in valeurs_possibles])
+    print(f"valeurs triées pour {attribut}: {valeurs_triees}") if debug else None
+    indice_median = len(valeurs_triees)//2
 
-    return data_discret,donnees_possibles_discret
+    borne_inf = float("-inf")
+    borne_sup = float("inf")
 
-# filename = "data/golf.csv"
+    intervalle_inf = [borne_inf,valeurs_triees[indice_median]]
+    intervalle_sup = [valeurs_triees[indice_median]+1,borne_sup]
+    
+    print(f"intervalle inférieur : {intervalle_inf}") if debug else None
+    print(f"intervalle supérieur : {intervalle_sup}") if debug else None
 
-# for instance in read_data(filename)[0]:
-#     print(instance)
-# print('\n')
-# print(read_data(filename)[1])
-# print('\n')
+    for instance in data:
+        instance_discretise = instance.copy()
+        if float(instance[attribut]) <= intervalle_inf[1]:
+            instance_discretise[attribut] = f"[{intervalle_inf[0]};{intervalle_inf[1]}]"
+        else:
+            instance_discretise[attribut] = f"[{intervalle_sup[0]};{intervalle_sup[1]}]"
+        data_discretise.append(instance_discretise)
 
-# attribut_classe = 'play'
-# data,donnees_possibles = read_data(filename)
-# arbre=construire_arbre(data,donnees_possibles,attribut_classe)
+    donnees_possibles_discretise[attribut] = {f"[{intervalle_inf[0]};{intervalle_inf[1]}]",f"[{intervalle_sup[0]};{intervalle_sup[1]}]"}
+    print(f"données discrétisées : {data_discretise}") if debug else None
+    print(f"valeurs possibles discrétisées : {donnees_possibles_discretise}") if debug else None
+    return data_discretise,donnees_possibles_discretise
+
+# TESTS -----------------------------------------------------------------------
+
+# if __name__ == '__main__':
+    # filename = "data/golf.csv"
+
+    # for instance in read_data(filename)[0]:
+    #     print(instance)
+    # print('\n')
+    # print(read_data(filename)[1])
+    # print('\n')
+
+    # attribut_classe = 'play'
+    # data,donnees_possibles = read_data(filename)
+    # arbre=construire_arbre(data,donnees_possibles,attribut_classe)
 
 
-# afficher_arbre(arbre,debug=True)
+    # afficher_arbre(arbre,debug=True)
 
 
-# filename = "data/golf_bis.csv"
-# data,donnees_possibles = read_data(filename)
-# colonnes_a_discretiser = ['temp','humidity']
-# data,donnees_possibles = discretser_data(data,donnees_possibles,colonnes_a_discretiser,nb_domaines=4)
+    # filename = "data/golf_bis.csv"
+    # data,donnees_possibles = read_data(filename)
+    # colonnes_a_discretiser = ['temp','humidity']
+    # data,donnees_possibles = discretser_data(data,donnees_possibles,colonnes_a_discretiser,nb_domaines=4)
 
-# arbre_bis=construire_arbre(data,donnees_possibles,attribut_classe)
-# afficher_arbre(arbre_bis,debug=True)
+    # arbre_bis=construire_arbre(data,donnees_possibles,attribut_classe)
+    # afficher_arbre(arbre_bis,debug=True)
 
-# # TEST C4.5
-# filename = "data/golf.csv"
-# attribut_classe = 'play'
-# data,donnees_possibles = read_data(filename)
-# attribut = "outlook"
-# print(calcul_gains(data,donnees_possibles,attribut_classe)[attribut])
-# print(split_entropie(data,donnees_possibles,attribut,attribut_classe))
-# print(ratio_gain(data,donnees_possibles,attribut_classe))
-# arbre=construire_arbre(data[:10],donnees_possibles,attribut_classe,method="C45")
-# afficher_arbre(arbre,debug=True)
+    # TEST C4.5
+    # filename = "data/golf_copy.csv"
+    # attribut_classe = 'play'
+    # data,donnees_possibles = read_data(filename)
+
+    # donnees_discretisables = liste_discretisable(donnees_possibles)
+    # for attribut in donnees_discretisables:
+    #     data,donnees_possibles=discretiser(data,donnees_possibles,attribut,donnees_discretisables[attribut])
+    # print(data)
+    # print(donnees_possibles)
+
+    # arbre = construire_arbre(data,donnees_possibles,attribut_classe,method="C45")
+    # afficher_arbre(arbre,debug=True)
+    # attribut = "outlook"
+    # print(calcul_gains(data,donnees_possibles,attribut_classe)[attribut])
+    # print(split_entropie(data,donnees_possibles,attribut,attribut_classe))
+    # print(ratio_gain(data,donnees_possibles,attribut_classe))
+    # arbre=construire_arbre(data,donnees_possibles,attribut_classe,method="C45")
+    # afficher_arbre(arbre,debug=True)
