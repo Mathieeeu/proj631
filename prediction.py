@@ -54,16 +54,3 @@ def predire_valeurs_manquantes(data,donnees_possibles,arbre,attribut_classe='cla
     #     f.write(','.join(data_corrigee[0].keys())+'\n')
     #     for instance in data_corrigee:
     #         f.write(','.join([str(v) for v in instance.values()])+'\n')
-
-if __name__ == '__main__':
-    filename = "data/golf.csv"
-    # filename = "data/golf_bis.csv"
-    attribut_classe = 'play'
-    data,donnees_possibles = read_data(filename)
-    data_training = data[:10]
-    arbre=construire_arbre(data_training,donnees_possibles,attribut_classe,method="ID3",)
-    afficher_arbre(arbre,debug=True)
-
-    data_test = data[10:]
-    matrice = matrice_confusion(data_test,donnees_possibles,arbre,attribut_classe)
-    print(matrice)
