@@ -61,6 +61,30 @@ Affichage de l'arbre
 -----------
 Pour afficher l'arbre, il faut executer la commande suivante : `afficher_arbre(arbre,debug=True)`.
 Lors de l'execution de cette commande, l'arbre sera affiché sous forme de texte dans la console et enregistré dans un fichier "arbre.json".
+```Arbre construit :
+outlook
+| sunny
+| | temp
+| | | mild
+| | | | play
+| | | | | no
+| | | cool
+| | | | play
+| | | | | yes
+| | | hot
+| | | | play
+| | | | | no
+| rain
+| | wind
+| | | false
+| | | | play
+| | | | | yes
+| | | true
+| | | | play
+| | | | | no
+| overcast
+| | play
+| | | yes```
 
 Matrice de confusion
 -----------
