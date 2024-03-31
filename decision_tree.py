@@ -11,8 +11,6 @@ def construire_arbre(data,donnees_possibles,attribut_classe='class',racine={},me
     # on supprime les ? des données possibles
     for attribut in donnees_possibles:
         donnees_possibles[attribut].discard('?')
-    print(data)
-    exit()
     if method == "ID3":
         gains = calcul_gains(data,donnees_possibles,attribut_classe)
         meilleur_attribut = max(gains, key=gains.get, default=None)

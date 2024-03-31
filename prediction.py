@@ -41,29 +41,29 @@ def predire_valeurs_manquantes(data,donnees_possibles,arbre,attribut_classe='cla
     return data
 
 # TESTS -----------------------------------------------------------------------
-if __name__ == '__main__':
-    # filename = "data/golf.csv"
-    # # filename = "data/golf_bis.csv"
+    # filename = "data/golf_copy.csv"
     # attribut_classe = 'play'
     # data,donnees_possibles = read_data(filename)
-    # data_training = data[:10]
-    # arbre=construire_arbre(data_training,donnees_possibles,attribut_classe,method="ID3",)
-    # afficher_arbre(arbre,debug=True)
+    # print(data)
+    # arbre2 = construire_arbre(data,donnees_possibles,attribut_classe,method="ID3")
+    # afficher_arbre(arbre2,debug=True)
+    # data_corrigee = predire_valeurs_manquantes(data,donnees_possibles,arbre2,attribut_classe)
 
-    # data_test = data[10:]
-    # matrice = matrice_confusion(data_test,donnees_possibles,arbre,attribut_classe)
-    # print(matrice)
+    # # enregistre les données corrigées dans un fichier csv
+    # with open(f"{filename[:-4]}_corrigee.csv","w") as f:
+    #     f.write(','.join(data_corrigee[0].keys())+'\n')
+    #     for instance in data_corrigee:
+    #         f.write(','.join([str(v) for v in instance.values()])+'\n')
 
-    filename = "data/golf_copy.csv"
+if __name__ == '__main__':
+    filename = "data/golf.csv"
+    # filename = "data/golf_bis.csv"
     attribut_classe = 'play'
     data,donnees_possibles = read_data(filename)
-    print(data)
-    arbre2 = construire_arbre(data,donnees_possibles,attribut_classe,method="ID3")
-    afficher_arbre(arbre2,debug=True)
-    data_corrigee = predire_valeurs_manquantes(data,donnees_possibles,arbre2,attribut_classe)
+    data_training = data[:10]
+    arbre=construire_arbre(data_training,donnees_possibles,attribut_classe,method="ID3",)
+    afficher_arbre(arbre,debug=True)
 
-    # enregistre les données corrigées dans un fichier csv
-    with open(f"{filename[:-4]}_corrigee.csv","w") as f:
-        f.write(','.join(data_corrigee[0].keys())+'\n')
-        for instance in data_corrigee:
-            f.write(','.join([str(v) for v in instance.values()])+'\n')
+    data_test = data[10:]
+    matrice = matrice_confusion(data_test,donnees_possibles,arbre,attribut_classe)
+    print(matrice)
