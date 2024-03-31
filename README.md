@@ -54,7 +54,7 @@ Les feuilles de l'arbre sont des dictionnaires avec une seule clé "classe" et c
 
 Exemple d'arbre :
 ```
-{'outlook': {'sunny': {'humidity': {'high': 'no', 'normal': 'yes'}}, 'overcast': 'yes', 'rainy': {'wind': {'strong': 'no', 'weak': 'yes'}}}}
+{'outlook': {'sunny': {'temp': {'mild': {'play': 'no'}, 'cool': {'play': 'yes'}, 'hot': {'play': 'no'}}}, 'rain': {'wind': {'false': {'play': 'yes'}, 'true': {'play': 'no'}}}, 'overcast': {'play': 'yes'}}}
 ```
 
 Affichage de l'arbre
