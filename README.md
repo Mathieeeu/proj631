@@ -61,7 +61,8 @@ Affichage de l'arbre
 -----------
 Pour afficher l'arbre, il faut executer la commande suivante : `afficher_arbre(arbre,debug=True)`.
 Lors de l'execution de cette commande, l'arbre sera affiché sous forme de texte dans la console et enregistré dans un fichier "arbre.json".
-```Arbre construit :
+Exemple pour l'arbre précédent :
+```
 outlook
 | sunny
 | | temp
@@ -84,8 +85,8 @@ outlook
 | | | | | no
 | overcast
 | | play
-| | | yes```
-
+| | | yes
+```
 Matrice de confusion
 -----------
 La matrice de confusion est un outil permettant de mesurer la qualité d'un système de classification.
