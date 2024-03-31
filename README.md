@@ -84,8 +84,8 @@ outlook
 | | | | | no
 | overcast
 | | play
-| | | yes```
-
+| | | yes
+```
 Matrice de confusion
 -----------
 La matrice de confusion est un outil permettant de mesurer la qualité d'un système de classification.
