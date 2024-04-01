@@ -17,7 +17,7 @@ Features
 
 Utilisation
 -----------
-Pour utiliser ce programme, il faut executer le fichier `main.py` avec la commande suivante : `python main.py`. Celui-ci contient un exemple d'utilisation des arbres de décision avec l'algorithmes ID3 pour le jeu de données `"golf.csv"`.
+Pour utiliser ce programme, il faut executer le fichier `main.py`. Celui-ci contient un exemple d'utilisation des arbres de décision avec l'algorithmes ID3 pour le jeu de données `"golf.csv"`.
 
 ID3
 -----------
